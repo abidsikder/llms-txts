@@ -238,7 +238,6 @@ def zarr(version: str | None):
         html_zip_dl_url,
         Path("scratchspace/zarr") / str(latest_version) / f"zarr-v{latest_version}.zip",
     )
-    print(extracted)
     ep("Converting the html documentation to text...")
     index_html_p = extracted / "index.html"
     index_html = index_html_p.read_text()
@@ -253,6 +252,46 @@ def zarr(version: str | None):
 
 cli.add_command(zarr)
 
+license_info["xarray"] = "Apache License 2.0"
+
+
+@click.command
+@click.option("--version")
+def xarray(version: str | None):
+    scratchspace = Path("scratchspace/xarray")
+    scratchspace.mkdir(exist_ok=True)
+
+    latest_version: str = version
+    if version is None:
+        latest_version = gh_latest_tag("pydata/xarray")
+
+    ep(f"Downloading xarray {latest_version} source repo, collecting docs...")
+    extracted = dl_ex_zip(
+        f"https://github.com/pydata/xarray/archive/refs/tags/v{latest_version}.zip",
+        scratchspace / latest_version / f"xarray-{latest_version}.zip",
+    )
+    txt_dest = Path(f"txts/xarray-{latest_version}.txt")
+    collect("*.rst", extracted / "doc" / "user-guide", txt_dest)
+
+    ep(f"Grabbing xarray's rendered api documentation and adding it to the txt...")
+    resp = httpx.get(f"https://docs.xarray.dev/en/v{latest_version}/api.html")
+    # filter out non doc html stuff
+    soup = BeautifulSoup(resp.text, "lxml")
+    soup = BeautifulSoup(
+        str(list(soup.find_all("article", class_="bd-article"))[0]), "lxml"
+    )
+    for tag in soup.find_all("a"):
+        tag.unwrap()
+    text_maker = html2text.HTML2Text()
+    text_maker.ignore_images = True
+    converted = text_maker.handle(str(soup))
+    with txt_dest.open(mode="a") as f:
+        f.write(converted)
+
+    ep(f"Done processing xarray {latest_version}")
+
+
+cli.add_command(xarray)
 
 license_info["icechunk"] = "Apache License 2.0"
 
@@ -280,7 +319,7 @@ def icechunk(version: str | None):
     # Grab the auto generated api documentation from the website
     resp = httpx.get(f"https://icechunk.io/en/v{latest_version}/reference/")
     # filter out non doc html stuff
-    soup = BeautifulSoup(resp.text, "html.parser")
+    soup = BeautifulSoup(resp.text, "lxml")
     content_div = soup.find("div", class_="md-content")
     # these are pieces of the source code along with line numbers below each line of the api documentation, they are unnecessary and clutter up the context with a bunch of line numbers
     quotes_to_remove = content_div.find_all("details", class_="quote")
@@ -302,18 +341,26 @@ cli.add_command(icechunk)
 
 
 license_info["mlx"] = "MIT License"
+
+
 @click.command
+@click.option("--version")
 def mlx():
     scratchspace = Path("scratchspace/mlx")
     scratchspace.mkdir(exist_ok=True)
 
     # download the latest build from the github pages branch
+    latest_version: str = version
+    if version is None:
+        latest_version = gh_latest_tag("earth-mover/icechunk")
+    ep(f"Downloading mlx {latest_version} gh-pages build")
     extracted = dl_ex_zip(
         "https://github.com/ml-explore/mlx/archive/refs/heads/gh-pages.zip",
-        scratchspace / "mlx-gh-pages.zip",
+        scratchspace / latest_version / "mlx-gh-pages.zip",
     )
     with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
         collected_html_p = Path(fp.name)
+        ep(f"Collecting together and filtering the html into the final txt...")
         collect(
             "*.html", extracted / "docs" / "build" / "html" / "python", collected_html_p
         )
@@ -329,10 +376,11 @@ def mlx():
         text_maker.ignore_images = True
         converted = text_maker.handle(str(soup))
 
-        latest_version = gh_latest_tag("ml-explore/mlx")
         txt_dest = Path(f"txts/mlx-{latest_version}.txt")
         with txt_dest.open(mode="w") as f:
             f.write(converted)
+
+    ep(f"Done processing mlx {latest_version}")
 
 
 cli.add_command(mlx)
