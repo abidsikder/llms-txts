@@ -1,8 +1,11 @@
 import io
+import json
 import re
 import shutil
 import subprocess
 import sys
+import tarfile
+import tempfile
 import typing
 import zipfile
 from pathlib import Path
@@ -11,6 +14,8 @@ import click
 import html2text
 import httpx
 from bs4 import BeautifulSoup
+
+license_info = dict()
 
 
 def ep(s):
@@ -38,6 +43,13 @@ def dl_ex_zip(dl_url: str, dest: Path) -> Path:
         extracted = Path(zip_ref.filename).with_suffix("")
 
     return extracted
+
+
+def devdocs_dl(slug: str, dest: Path):
+    """Download and extract a .tar.gz file from devdocs"""
+    resp = httpx.get(f"https://downloads.devdocs.io/{slug}.tar.gz")
+    file = tarfile.open(fileobj=io.BytesIO(resp.content), mode="r|gz")
+    file.extractall(path=dest)
 
 
 def collect(pattern: str, source: Path, dest: Path):
@@ -82,6 +94,9 @@ def cli():
     Path("txts").mkdir(exist_ok=True)
 
 
+license_info["python"] = "Python Software Foundation License Version 2"
+
+
 @click.command
 @click.argument("minor-version", type=str)
 def python(minor_version: str):
@@ -122,6 +137,9 @@ def python(minor_version: str):
 cli.add_command(python)
 
 
+license_info["zed"] = "GNU AGPLv3"
+
+
 @click.command
 @click.option("--version")
 def zed(version: str | None):
@@ -145,6 +163,10 @@ def zed(version: str | None):
 
 
 cli.add_command(zed)
+
+
+license_info["ruff"] = "MIT License"
+license_info["uv"] = "MIT License"
 
 
 def astral_sh(tool_name: typing.Literal["ruff", "uv"]):
@@ -174,6 +196,29 @@ def astral_sh(tool_name: typing.Literal["ruff", "uv"]):
 
 cli.add_command(astral_sh("ruff"))
 cli.add_command(astral_sh("uv"))
+
+
+license_info["progit book"] = (
+    "Creative Commons Attribution Non Commercial Share Alike 3.0"
+)
+
+
+@click.command
+def progit():
+    scratchspace = Path("scratchspace/progit")
+    scratchspace.mkdir(exist_ok=True)
+
+    extracted = dl_ex_zip(
+        "https://github.com/progit/progit2/archive/refs/heads/main.zip",
+        scratchspace / "progit2-main.zip",
+    )
+    collect("*.asc", extracted, Path("txts/git-progit2.txt"))
+
+
+cli.add_command(progit)
+
+
+license_info["zarr"] = "MIT License"
 
 
 @click.command
@@ -207,6 +252,9 @@ def zarr(version: str | None):
 
 
 cli.add_command(zarr)
+
+
+license_info["icechunk"] = "Apache License 2.0"
 
 
 @click.command
@@ -253,6 +301,121 @@ def icechunk(version: str | None):
 cli.add_command(icechunk)
 
 
+def devdocs_clean_and_write(source: Path, txt_dest: Path):
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
+        collected_html_p = Path(fp.name)
+        collect("*.html", source, collected_html_p)
+        soup = BeautifulSoup(collected_html_p.read_text(), "lxml")
+
+        # Clean up the context by removing unnecessary information
+        elems_to_remove = soup.find_all("div", class_="_attribution")
+        for elem in elems_to_remove:
+            elem.decompose()
+        # Clean up browser compatibility information from html/css docs to get under 25 MB
+        browser_compat_tables = soup.find_all("table", class_="standard-table")
+        for elem in browser_compat_tables:
+            elem.decompose()
+        # Remove all anchor hrefs and leave just the content
+        for tag in soup.find_all("a"):
+            tag.unwrap()
+
+        text_maker = html2text.HTML2Text()
+        text_maker.ignore_images = True
+        converted = text_maker.handle(str(soup))
+        with txt_dest.open(mode="w") as f:
+            f.write(converted)
+
+
+list_of_all_docs = json.load(httpx.get("https://devdocs.io/docs/docs.json"))
+
+
+def devdocs(tool_name: str):
+    @click.command(name=tool_name)
+    @click.option("--version", help="Has to match the devdocs.io version available.")
+    def f(version: str | None):
+        scratchspace = Path(f"scratchspace/{tool_name}")
+        scratchspace.mkdir(exist_ok=True)
+
+        slug = tool_name
+        if version is not None:
+            slug = slug + "~" + version
+        elif tool_name == "numpy":
+            # If it's numpy and a version was not specified, we need to find the latest slug since numpy is not available as an alias for some reason
+            versions = []
+            for d in list_of_all_docs:
+                if tool_name in d["slug"]:
+                    versions.append(d["version"])
+            latest_version = sorted(versions)[-1]
+            slug = slug + "~" + latest_version
+
+        ep(f"Downloading {slug} docs from devdocs")
+        devdocs_dl(slug, scratchspace)
+
+        meta_info = json.loads((scratchspace / "meta.json").read_text())
+        version: str = "vNA"
+        if "release" in meta_info:
+            version = meta_info["release"]
+        ep(f"Confirming downloaded {tool_name} {version} docs from devdocs")
+        ep(f"Cleaning up html and parsing it into a collated txt")
+        txt_dest = Path(f"txts/{tool_name}-{version}.txt")
+        devdocs_clean_and_write(scratchspace, txt_dest)
+
+        ep(f"Done processing {tool_name} {version}")
+
+    return f
+
+
+license_info["dom / Web APIs"] = (
+    "Creative Commons Attribution-ShareAlike License v2.5 or later"
+)
+cli.add_command(devdocs("dom"))
+license_info["css"] = "Creative Commons Attribution-ShareAlike License v2.5 or later"
+cli.add_command(devdocs("css"))
+license_info["html"] = "Creative Commons Attribution-ShareAlike License v2.5 or later"
+cli.add_command(devdocs("html"))
+license_info["javascript"] = (
+    "Creative Commons Attribution-ShareAlike License v2.5 or later"
+)
+cli.add_command(devdocs("javascript"))
+
+license_info["typescript"] = "Apache License, Version 2.0"
+cli.add_command(devdocs("typescript"))
+
+license_info["svelte"] = "MIT License"
+cli.add_command(devdocs("svelte"))
+
+license_info["vite"] = "MIT License"
+cli.add_command(devdocs("vite"))
+
+license_info["vitest"] = "MIT License"
+cli.add_command(devdocs("vitest"))
+
+license_info["git"] = "GPLv2"
+cli.add_command(devdocs("git"))
+license_info["bash"] = "GNU Free Documentation License"
+cli.add_command(devdocs("bash"))
+license_info["zsh"] = "MIT License"
+cli.add_command(devdocs("zsh"))
+
+
+license_info["homebrew"] = "BSD 2-Clause License"
+cli.add_command(devdocs("homebrew"))
+
+license_info["jq"] = "Creative Commons Attribution 3.0 license"
+cli.add_command(devdocs("jq"))
+
+license_info["numpy"] = "3-clause BSD License"
+cli.add_command(devdocs("numpy"))
+
+license_info["pytorch"] = (
+    "the pytorch BSD-like license https://github.com/pytorch/pytorch/blob/main/LICENSE"
+)
+cli.add_command(devdocs("pytorch"))
+
+license_info["click"] = "BSD 3-Clause License"
+cli.add_command(devdocs("click"))
+
+
 @click.command
 def build_site():
     ep("Constructing index.html with the list of all files...")
@@ -287,17 +450,21 @@ def build_site():
         tag = f'<li><a href="txts/{txt_p.name}" download>{txt_p.name}</a> ~ {rounded}K tokens</li>'
         index_html.write(tag)
 
-    foot = """
+    middle = """
     </ul>
     <h3>License Acknowledgments</h3>
     <ul>
-    <li>pro git book is licensed under the Creative Commons Attribution Non Commercial Share Alike 3.0</li>
-    <li>git documentation is licensed under the GPLv2</li>
-    <li>zarr documentation is licensed under the MIT License</li>
-    <li>icechunk documentation is licensed under the Apache License 2.0</li>
-    <li>python3 documentation is licensed under the Python Software Foundation License Version 2</li>
-    <li>zed editor documentation is licensed under GNU AGPLv3</li>
-    <li>ruff, uv documentation is licensed under the MIT License</li>
+    """
+    index_html.write(middle)
+
+    tool_names = sorted(list(license_info.keys()))
+    for tool_name in tool_names:
+        license = license_info[tool_name]
+        index_html.write(
+            f"<li>{tool_name} documentation is licensed under {license}</li>"
+        )
+
+    foot = """
     </ul>
     </body>
     </html>

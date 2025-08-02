@@ -9,6 +9,7 @@ dependencies = [
     "click>=8.2.1",
     "html2text>=2025.4.15",
     "httpx>=0.28.1",
+    "lxml>=6.0.0",
 ]
 
 [project.scripts]
