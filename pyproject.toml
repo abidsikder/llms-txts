@@ -24,8 +24,5 @@ dev = [
     "ruff>=0.12.7",
 ]
 
-[tool.ruff]
-exclude = ["repos"] # tell ruff to ignore the git submodules
-
 [tool.ruff.lint]
 select = ["I"]
