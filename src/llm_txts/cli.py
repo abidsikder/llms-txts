@@ -301,6 +301,43 @@ def icechunk(version: str | None):
 cli.add_command(icechunk)
 
 
+license_info["mlx"] = "MIT License"
+@click.command
+def mlx():
+    scratchspace = Path("scratchspace/mlx")
+    scratchspace.mkdir(exist_ok=True)
+
+    # download the latest build from the github pages branch
+    extracted = dl_ex_zip(
+        "https://github.com/ml-explore/mlx/archive/refs/heads/gh-pages.zip",
+        scratchspace / "mlx-gh-pages.zip",
+    )
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
+        collected_html_p = Path(fp.name)
+        collect(
+            "*.html", extracted / "docs" / "build" / "html" / "python", collected_html_p
+        )
+        soup = BeautifulSoup(collected_html_p.read_text(), "lxml")
+        # Remove all anchor hrefs and leave just the content
+        filtered = io.StringIO()
+        for elem in soup.find_all("article", class_="bd-article"):
+            filtered.write(str(elem))
+        soup = BeautifulSoup(filtered.getvalue(), "lxml")
+        for tag in soup.find_all("a"):
+            tag.unwrap()
+        text_maker = html2text.HTML2Text()
+        text_maker.ignore_images = True
+        converted = text_maker.handle(str(soup))
+
+        latest_version = gh_latest_tag("ml-explore/mlx")
+        txt_dest = Path(f"txts/mlx-{latest_version}.txt")
+        with txt_dest.open(mode="w") as f:
+            f.write(converted)
+
+
+cli.add_command(mlx)
+
+
 def devdocs_clean_and_write(source: Path, txt_dest: Path):
     with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
         collected_html_p = Path(fp.name)
