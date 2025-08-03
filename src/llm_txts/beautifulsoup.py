@@ -4,6 +4,9 @@ import click
 import httpx
 
 from .cli import cli
+from .license_info import license_info
+
+license_info["beautifulsoup"] = "MIT License"
 
 
 @click.command
