@@ -1,9 +1,9 @@
  # ignore the built website directory
-site-build/*
+site-build
 
 .DS_Store
 scratchspace
-txts/
+txts
 
 # === github's ignore rules for python ===
 # Byte-compiled / optimized / DLL files
