@@ -5,7 +5,7 @@ import click
 import httpx
 from bs4 import BeautifulSoup
 
-from .cli import cli, collect
+from .cli import cli, collect, dl_zip
 from .license_info import license_info
 
 license_info["python"] = "Python Software Foundation License Version 2"
@@ -35,18 +35,14 @@ def python(ctx, minor_version: str):
     version = f"{minor_version}.{latest_patch}"
     logging.info(f"Found latest patch version {version}")
 
-    version_p = scratchspace / version
-    version_p.mkdir(exist_ok=True)
-
-    download_url = f"https://www.python.org/ftp/python/doc/{version}/python-{version}-docs-text.zip"
-    zip_dest = version_p / f"python-{version}-docs-text.zip"
     logging.info("Downloading documentation txt zip and extracting")
-    docs_dest = dl_ex_zip(download_url, zip_dest)
+    download_url = f"https://www.python.org/ftp/python/doc/{version}/python-{version}-docs-text.zip"
+    dl_zip(download_url, scratchspace)
     txt_dest = ctx.obj["txts"] / f"python-{version}.txt"
     logging.info(
         f"Collecting all doc txts into a single txt and placing it inside of {txt_dest}"
     )
-    collect("*.txt", docs_dest, txt_dest)
+    collect("*.txt", scratchspace / f"python-{version}-docs-text", txt_dest)
     logging.info(f"Done processing python {version}")
 
 
