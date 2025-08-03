@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from .cli import cli, gh_latest_tag, dl_zip
+from .cli import cli, dl_zip, gh_latest_tag
 from .license_info import license_info
 
 license_info["zarr"] = "MIT License"
@@ -21,8 +21,7 @@ def zarr(ctx, version: str | None):
 
     logging.info(f"Downloading html zip of zarr {version} from readthedocs")
     dl_zip(
-        f"https://zarr.readthedocs.io/_/downloads/en/v{version}/htmlzip/",
-        scratchspace
+        f"https://zarr.readthedocs.io/_/downloads/en/v{version}/htmlzip/", scratchspace
     )
     extracted = scratchspace / f"zarr-v{version}"
     logging.info("Converting the html documentation to text")
