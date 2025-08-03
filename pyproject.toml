@@ -25,4 +25,6 @@ dev = [
 ]
 
 [tool.ruff.lint]
-select = ["I"]
+select = ["I", "F401"]
+# I enables import sorting
+# F401 detects unused variables

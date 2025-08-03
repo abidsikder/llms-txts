@@ -1,12 +1,11 @@
 import logging
 import re
-from pathlib import Path
 
 import click
 import httpx
 from bs4 import BeautifulSoup
 
-from .cli import cli, collect, dl_zip
+from .cli import cli, collect
 from .license_info import license_info
 
 license_info["python"] = "Python Software Foundation License Version 2"

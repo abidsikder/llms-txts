@@ -1,13 +1,10 @@
-import io
 import logging
-import tempfile
-from pathlib import Path
 
 import click
 import httpx
 from bs4 import BeautifulSoup
 
-from .cli import cli, collect, common_soup_clean, dl_tgz, dl_zip, gh_latest_tag
+from .cli import cli, collect, common_soup_clean, dl_tgz, gh_latest_tag
 from .license_info import license_info
 
 license_info["icechunk"] = "Apache License 2.0"

@@ -1,5 +1,4 @@
 import logging
-import typing
 
 import click
 import httpx

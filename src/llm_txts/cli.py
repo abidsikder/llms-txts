@@ -3,22 +3,16 @@ Contains the click.group cli entrypoint, and any utility functions.
 """
 
 import io
-import json
 import logging
-import re
-import shutil
 import subprocess
 import sys
 import tarfile
-import tempfile
-import typing
 import zipfile
 from pathlib import Path
 
 import click
 import html2text
 import httpx
-from bs4 import BeautifulSoup
 
 from .license_info import license_info
 

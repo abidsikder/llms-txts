@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from .cli import cli, collect, dl_zip, gh_latest_tag
+from .cli import cli, gh_latest_tag
 from .license_info import license_info
 
 license_info["zarr"] = "MIT License"
