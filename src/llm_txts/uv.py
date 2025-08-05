@@ -15,7 +15,7 @@ def uv(ctx):
     scratchspace.mkdir(exist_ok=True)
 
     logging.info("Finding latest version of uv")
-    version = gh_latest_tag(f"astral-sh/uv")
+    version = gh_latest_tag("astral-sh/uv")
 
     logging.info(f"Downloading uv {version} source code from github")
     download_url = f"https://github.com/astral-sh/uv/archive/refs/tags/{version}.tar.gz"
