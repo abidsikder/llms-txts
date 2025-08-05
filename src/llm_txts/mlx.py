@@ -28,7 +28,7 @@ def mlx(ctx):
         scratchspace,
     )
     with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
-        logging.info(f"Processing built html into the final txt")
+        logging.info(f"Processing built html into the final markdown")
         collected_html_p = Path(fp.name)
         collect(
             "dev/**.html,examples/**.html,python/**.html",
@@ -46,7 +46,7 @@ def mlx(ctx):
         text_maker = ctx.obj["text_maker"]
         converted = text_maker.handle(str(soup))
 
-        txt_dest = ctx.obj["txts"] / f"mlx-{version}.txt"
+        txt_dest = ctx.obj["txts"] / f"mlx-{version}.md"
         with txt_dest.open(mode="w") as f:
             f.write(converted)
 

@@ -25,7 +25,7 @@ def uv(ctx):
     logging.info(f"Wrote source code to {extracted_dest}")
 
     txts = ctx.obj["txts"]
-    txt_dest = txts / f"uv-{version}.txt"
+    txt_dest = txts / f"uv-{version}.md"
     logging.info(f"Collecting uv md docs together and writing to {txt_dest}")
     collect("**.md", extracted_dest / "docs", txt_dest, exclude="cli.md")
 
