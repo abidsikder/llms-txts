@@ -8,6 +8,7 @@ from . import (
     progit,
     python,
     ruff,
+    typst,
     uv,
     xarray,
     zarr,

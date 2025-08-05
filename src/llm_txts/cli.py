@@ -3,6 +3,7 @@ Contains the click.group cli entrypoint, and any utility functions.
 """
 
 import io
+import itertools
 import logging
 import subprocess
 import sys
@@ -139,7 +140,7 @@ def build_site(ctx):
     index_html.write(head)
 
     txts = ctx.obj["txts"]
-    txt_ps = list(txts.rglob("*.txt"))
+    txt_ps = list(itertools.chain(txts.rglob("*.txt"), txts.rglob("*.md")))
     # go through things alphabetically so that the website has a list in an alphabetical format
     txt_ps = sorted(txt_ps)
     for txt_p in txt_ps:
