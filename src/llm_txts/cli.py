@@ -74,7 +74,7 @@ def common_soup_clean(soup):
         if a_tag.string == "#":
             a_tag.decompose()
 
-    # Remove emphasis and italics that mlx docs uses to further reduce the total size
+    # Remove emphasis and italics
     for elem in soup.find_all("strong"):
         elem.unwrap()
     for elem in soup.find_all("em"):
