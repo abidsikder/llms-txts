@@ -94,6 +94,18 @@ def devdocs(tool_name: str):
                     for p in download_dir.glob("*.html"):
                         if p.is_file():
                             fp.write(p.read_text())
+                case "dom":
+                    for p in download_dir.glob("*.html"):
+                        if not p.is_file():
+                            continue
+                        # Don't collect the WebXR api or its other features, it is not well supported
+                        if p.name.startswith("webxr") or p.name.startswith("xr"):
+                            continue
+
+                        # Only collect non-deprecated features
+                        soup = BeautifulSoup(p.read_text(), "lxml")
+                        if not soup.select_one("div.notecard.deprecated"):
+                            fp.write(p.read_text())
                 case _:
                     collect("**.html", download_dir, collected_html_p)
 
@@ -130,6 +142,13 @@ def devdocs(tool_name: str):
                     for elem in soup.find_all(
                         "section", attrs={"aria-labelledby": "see_also"}
                     ):
+                        elem.decompose()
+                case "dom":
+                    for elem in soup.select("h2#see_also + div.section-content"):
+                        elem.decompose()
+                    for elem in soup.find_all("h2", id="see_also"):
+                        elem.decompose()
+                    for elem in soup.find_all("div", class_="experimental"):
                         elem.decompose()
 
             common_soup_clean(soup)
