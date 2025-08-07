@@ -46,7 +46,7 @@ def devdocs(tool_name: str):
             slug = slug + "~" + latest_version
 
         logging.info(f"Downloading {slug} docs from devdocs")
-        version: str = "vNA"
+        version: str = "latest"
         download_dir = scratchspace / version
         dl_devdocs(slug, download_dir)
 
