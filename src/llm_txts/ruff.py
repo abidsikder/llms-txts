@@ -15,7 +15,7 @@ def ruff(ctx):
     scratchspace.mkdir(exist_ok=True)
 
     logging.info("Finding latest version of ruff")
-    version = gh_latest_tag(f"astral-sh/ruff")
+    version = gh_latest_tag("astral-sh/ruff")
 
     logging.info(f"Downloading ruff {version} source code from github")
     download_url = (
@@ -27,7 +27,7 @@ def ruff(ctx):
     logging.info(f"Wrote source code to {extracted_dest}")
 
     txts = ctx.obj["txts"]
-    txt_dest = txts / f"ruff-{version}.txt"
+    txt_dest = txts / f"ruff-{version}.md"
     logging.info(f"Collecting ruff md docs together and writing to {txt_dest}")
     collect("**.md", extracted_dest / "docs", txt_dest)
 

@@ -46,7 +46,7 @@ def devdocs(tool_name: str):
             slug = slug + "~" + latest_version
 
         logging.info(f"Downloading {slug} docs from devdocs")
-        version: str = "vNA"
+        version: str = "latest"
         download_dir = scratchspace / version
         dl_devdocs(slug, download_dir)
 
@@ -62,23 +62,93 @@ def devdocs(tool_name: str):
         logging.info(f"Downloaded {tool_name} {version} docs into {download_dir}")
 
         logging.info(f"Cleaning up html and parsing it into a collated txt")
-        txt_dest = ctx.obj["txts"] / f"{tool_name}-{version}.txt"
+        txt_dest = ctx.obj["txts"] / f"{tool_name}-{version}.md"
         with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
             collected_html_p = Path(fp.name)
-            collect("**.html", download_dir, collected_html_p)
+            match tool_name:
+                case "numpy":
+                    collect(
+                        "user/**.html,reference/**.html",
+                        download_dir,
+                        collected_html_p,
+                        exclude="reference/c-api/**.html,reference/distutils/**.html,reference/distutils*.html",
+                    )
+                case "javascript":
+                    collect(
+                        "**.html",
+                        download_dir,
+                        collected_html_p,
+                        exclude="global_objects/**.html",
+                    )
+                    with tempfile.NamedTemporaryFile(
+                        mode="w+", delete=True, suffix=".html"
+                    ) as fp2:
+                        collected_html_p2 = Path(fp2.name)
+                        collect(
+                            "global_objects/*.html",
+                            download_dir,
+                            collected_html_p2,
+                        )
+                        fp.write(collected_html_p2.read_text())
+                case "css":
+                    for p in download_dir.glob("*.html"):
+                        if p.is_file():
+                            fp.write(p.read_text())
+                case "dom":
+                    for p in download_dir.glob("*.html"):
+                        if not p.is_file():
+                            continue
+                        # Don't collect the WebXR api or its other features, it is not well supported
+                        if p.name.startswith("webxr") or p.name.startswith("xr"):
+                            continue
+
+                        # Only collect non-deprecated features
+                        soup = BeautifulSoup(p.read_text(), "lxml")
+                        if not soup.select_one("div.notecard.deprecated"):
+                            fp.write(p.read_text())
+                case _:
+                    collect("**.html", download_dir, collected_html_p)
+
             soup = BeautifulSoup(collected_html_p.read_text(), "lxml")
 
             # Clean up the context by removing unnecessary information
             for elem in soup.find_all("div", class_="_attribution"):
                 elem.decompose()
-            # Clean up browser compatibility information from dom/html/css docs to get under 25 MB
+            # Clean up browser compatibility information from dom/html/css to reduce total size
             match tool_name:
                 case "dom" | "html" | "css" | "javascript":
                     for elem in soup.find_all("details", class_="baseline-indicator"):
                         elem.decompose()
                     for elem in soup.select("h2#specifications + div._table"):
                         elem.decompose()
+                    for elem in soup.find_all(
+                        "h2", id="specifications"
+                    ):  # the above doesn't destroy the h2 itself for some reason...
+                        elem.decompose()
                     for elem in soup.select("h2#browser_compatibility + div._table"):
+                        elem.decompose()
+                    for elem in soup.find_all("h2", id="browser_compatibility"):
+                        elem.decompose()
+            match tool_name:
+                case "css":
+                    for elem in soup.find_all(
+                        "section", attrs={"aria-labelledby": "formal_syntax"}
+                    ):
+                        elem.decompose()
+                    for elem in soup.find_all(
+                        "section", attrs={"aria-labelledby": "formal_definition"}
+                    ):
+                        elem.decompose()
+                    for elem in soup.find_all(
+                        "section", attrs={"aria-labelledby": "see_also"}
+                    ):
+                        elem.decompose()
+                case "dom":
+                    for elem in soup.select("h2#see_also + div.section-content"):
+                        elem.decompose()
+                    for elem in soup.find_all("h2", id="see_also"):
+                        elem.decompose()
+                    for elem in soup.find_all("div", class_="experimental"):
                         elem.decompose()
 
             common_soup_clean(soup)

@@ -29,7 +29,7 @@ def icechunk(ctx, version: str | None):
     dl_tgz(download_url, scratchspace)
     extracted = scratchspace / f"icechunk-{version}"
     logging.info("Collecting handwritten docs from source code")
-    txt_dest = ctx.obj["txts"] / f"icechunk-{version}.txt"
+    txt_dest = ctx.obj["txts"] / f"icechunk-{version}.md"
     collect("**.md", extracted / "docs" / "docs", txt_dest)
 
     logging.info("Collecting the auto generated api docs from the website")

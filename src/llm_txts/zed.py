@@ -28,7 +28,7 @@ def zed(ctx, version: str | None):
     logging.info(f"Wrote source code to {extracted_dest}")
 
     txts = ctx.obj["txts"]
-    txt_dest = txts / f"zed-{version}.txt"
+    txt_dest = txts / f"zed-{version}.md"
     logging.info(f"Collecting zed md docs together and writing to {txt_dest}")
     collect("**.md", extracted_dest, txt_dest)
 

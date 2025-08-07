@@ -29,7 +29,7 @@ def zarr(ctx, version: str | None):
     index_html = index_html_p.read_text()
     text_maker = ctx.obj["text_maker"]
     converted = text_maker.handle(index_html)
-    final_txt_p = ctx.obj["txts"] / f"zarr-{version}.txt"
+    final_txt_p = ctx.obj["txts"] / f"zarr-{version}.md"
     logging.info(f"Writing collated txt to {final_txt_p}")
     final_txt_p.write_text(converted)
     logging.info(f"Done with zarr {version}")

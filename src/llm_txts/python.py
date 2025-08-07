@@ -42,7 +42,12 @@ def python(ctx, minor_version: str):
     logging.info(
         f"Collecting all doc txts into a single txt and placing it inside of {txt_dest}"
     )
-    collect("*.txt", scratchspace / f"python-{version}-docs-text", txt_dest)
+    collect(
+        "library/**.txt",
+        scratchspace / f"python-{version}-docs-text",
+        txt_dest,
+        exclude="stdtypes.txt",
+    )
     logging.info(f"Done processing python {version}")
 
 

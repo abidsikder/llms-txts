@@ -3,6 +3,7 @@ Contains the click.group cli entrypoint, and any utility functions.
 """
 
 import io
+import itertools
 import logging
 import subprocess
 import sys
@@ -73,7 +74,7 @@ def common_soup_clean(soup):
         if a_tag.string == "#":
             a_tag.decompose()
 
-    # Remove emphasis and italics that mlx docs uses to further reduce the total size
+    # Remove emphasis and italics
     for elem in soup.find_all("strong"):
         elem.unwrap()
     for elem in soup.find_all("em"):
@@ -131,7 +132,8 @@ def build_site(ctx):
     head = """<!doctype html><html>
     <head><title>llm-txts</title></head>
     <body>
-    <h1>llm-txts for use with your favorite long context LLM or RAG system.</h1>
+    <h1>llm-txts for use with your favorite long context LLM or RAG system</h1>
+    <p>Most token sizes here aim for &lt;800K tokens, but it remains a challenge with some particularly large documentation sets. Work is ongoing to pare them down for LLM digestability.</p>
 
     <a href="https://github.com/abidsikder/llm-txts" target="_blank">GitHub</a>
     <ul>
@@ -139,7 +141,7 @@ def build_site(ctx):
     index_html.write(head)
 
     txts = ctx.obj["txts"]
-    txt_ps = list(txts.rglob("*.txt"))
+    txt_ps = list(itertools.chain(txts.rglob("*.txt"), txts.rglob("*.md")))
     # go through things alphabetically so that the website has a list in an alphabetical format
     txt_ps = sorted(txt_ps)
     for txt_p in txt_ps:
