@@ -65,29 +65,53 @@ def devdocs(tool_name: str):
         txt_dest = ctx.obj["txts"] / f"{tool_name}-{version}.md"
         with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
             collected_html_p = Path(fp.name)
-            if tool_name == "numpy":
-                collect(
-                    "user/**.html,reference/**.html",
-                    download_dir,
-                    collected_html_p,
-                    exclude="reference/c-api/**.html,reference/distutils/**.html,reference/distutils*.html",
-                )
-            else:
-                collect("**.html", download_dir, collected_html_p)
+            match tool_name:
+                case "numpy":
+                    collect(
+                        "user/**.html,reference/**.html",
+                        download_dir,
+                        collected_html_p,
+                        exclude="reference/c-api/**.html,reference/distutils/**.html,reference/distutils*.html",
+                    )
+                case "javascript":
+                    collect(
+                        "**.html",
+                        download_dir,
+                        collected_html_p,
+                        exclude="global_objects/**.html",
+                    )
+                    with tempfile.NamedTemporaryFile(
+                        mode="w+", delete=True, suffix=".html"
+                    ) as fp2:
+                        collected_html_p2 = Path(fp2.name)
+                        collect(
+                            "global_objects/*.html",
+                            download_dir,
+                            collected_html_p2,
+                        )
+                        fp.write(collected_html_p2.read_text())
+                case _:
+                    collect("**.html", download_dir, collected_html_p)
 
             soup = BeautifulSoup(collected_html_p.read_text(), "lxml")
 
             # Clean up the context by removing unnecessary information
             for elem in soup.find_all("div", class_="_attribution"):
                 elem.decompose()
-            # Clean up browser compatibility information from dom/html/css docs to get under 25 MB
+            # Clean up browser compatibility information from dom/html/css to reduce total size
             match tool_name:
                 case "dom" | "html" | "css" | "javascript":
                     for elem in soup.find_all("details", class_="baseline-indicator"):
                         elem.decompose()
                     for elem in soup.select("h2#specifications + div._table"):
                         elem.decompose()
+                    for elem in soup.find_all(
+                        "h2", id="specifications"
+                    ):  # the above doesn't destroy the h2 itself for some reason...
+                        elem.decompose()
                     for elem in soup.select("h2#browser_compatibility + div._table"):
+                        elem.decompose()
+                    for elem in soup.find_all("h2", id="browser_compatibility"):
                         elem.decompose()
 
             common_soup_clean(soup)
