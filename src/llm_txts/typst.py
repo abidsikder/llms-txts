@@ -18,7 +18,7 @@ def typst(ctx):
     download_url = "https://raw.githubusercontent.com/abidsikder/typst-docs-single-file/refs/heads/main/docs.md"
     resp = httpx.get(download_url, follow_redirects=True)
 
-    txt_dest = ctx.obj["txts"] / "typst.md"
+    txt_dest = ctx.obj["txts"] / "typst-0.13.1.md"
     with txt_dest.open("w") as f:
         f.write(resp.text)
 
