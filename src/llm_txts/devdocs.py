@@ -90,6 +90,10 @@ def devdocs(tool_name: str):
                             collected_html_p2,
                         )
                         fp.write(collected_html_p2.read_text())
+                case "css":
+                    for p in download_dir.glob("*.html"):
+                        if p.is_file():
+                            fp.write(p.read_text())
                 case _:
                     collect("**.html", download_dir, collected_html_p)
 
@@ -112,6 +116,20 @@ def devdocs(tool_name: str):
                     for elem in soup.select("h2#browser_compatibility + div._table"):
                         elem.decompose()
                     for elem in soup.find_all("h2", id="browser_compatibility"):
+                        elem.decompose()
+            match tool_name:
+                case "css":
+                    for elem in soup.find_all(
+                        "section", attrs={"aria-labelledby": "formal_syntax"}
+                    ):
+                        elem.decompose()
+                    for elem in soup.find_all(
+                        "section", attrs={"aria-labelledby": "formal_definition"}
+                    ):
+                        elem.decompose()
+                    for elem in soup.find_all(
+                        "section", attrs={"aria-labelledby": "see_also"}
+                    ):
                         elem.decompose()
 
             common_soup_clean(soup)
