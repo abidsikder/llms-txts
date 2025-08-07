@@ -65,7 +65,16 @@ def devdocs(tool_name: str):
         txt_dest = ctx.obj["txts"] / f"{tool_name}-{version}.md"
         with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
             collected_html_p = Path(fp.name)
-            collect("**.html", download_dir, collected_html_p)
+            if tool_name == "numpy":
+                collect(
+                    "user/**.html,reference/**.html",
+                    download_dir,
+                    collected_html_p,
+                    exclude="reference/c-api/**.html,reference/distutils/**.html,reference/distutils*.html",
+                )
+            else:
+                collect("**.html", download_dir, collected_html_p)
+
             soup = BeautifulSoup(collected_html_p.read_text(), "lxml")
 
             # Clean up the context by removing unnecessary information
