@@ -132,7 +132,8 @@ def build_site(ctx):
     head = """<!doctype html><html>
     <head><title>llm-txts</title></head>
     <body>
-    <h1>llm-txts for use with your favorite long context LLM or RAG system.</h1>
+    <h1>llm-txts for use with your favorite long context LLM or RAG system</h1>
+    <p>Most token sizes here are aiming for &lt;800K tokens, but it remains a challenge with some particularly large documentation sets. Work is ongoing to pare them down for LLM digestability.</p>
 
     <a href="https://github.com/abidsikder/llm-txts" target="_blank">GitHub</a>
     <ul>
