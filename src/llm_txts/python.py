@@ -46,7 +46,7 @@ def python(ctx, minor_version: str):
         "library/**.txt",
         scratchspace / f"python-{version}-docs-text",
         txt_dest,
-        exclude="stdtypes.txt",
+        exclude="stdtypes.txt,tk.txt,tkinter*.txt",
     )
     logging.info(f"Done processing python {version}")
 
