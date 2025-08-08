@@ -144,14 +144,36 @@ def build_site(ctx):
     txt_ps = list(itertools.chain(txts.rglob("*.txt"), txts.rglob("*.md")))
     # go through things alphabetically so that the website has a list in an alphabetical format
     txt_ps = sorted(txt_ps)
+
+    def is_misc_boto3(s):
+        if not txt_name.startswith("boto3"):
+            return False
+        if txt_name.endswith("general.txt") or txt_name.endswith("s3.txt"):
+            return False
+        return True
+
+    # Sort so that the misc boto3 stuff is at the end of the txts list
+    head = []
+    tail = []
+    for txt_p in txt_ps:
+        txt_name = txt_p.name
+        if is_misc_boto3(txt_name):
+            tail.append(txt_p)
+        else:
+            head.append(txt_p)
+    txt_ps = head + tail
+
     for txt_p in txt_ps:
         size_bytes = txt_p.stat().st_size
         approx_tokens = (
             size_bytes / 4
         )  # rough approximation by dividing by 4 characters per token
         rounded = round(approx_tokens / 1000)
+
+        txt_name = txt_p.name
+
         # e.g. <li><a href="txts/python-3.13.5.txt" download>python-3.13.5.txt</a> ~ 2856K tokens</li>
-        tag = f'<li><a href="txts/{txt_p.name}" download>{txt_p.name}</a> ~ {rounded}K tokens</li>'
+        tag = f'<li><a href="txts/{txt_name}" download>{txt_name}</a> ~ {rounded}K tokens</li>'
         index_html.write(tag)
 
     middle = """
