@@ -136,6 +136,9 @@ def build_site(ctx):
     <p>Most token sizes here aim for &lt;800K tokens, but it remains a challenge with some particularly large documentation sets. Work is ongoing to pare them down for LLM digestability.</p>
 
     <a href="https://github.com/abidsikder/llm-txts" target="_blank">GitHub</a>
+    <p>
+    Each entry is formatted as "tokens txt_name". Estimated token counts are given in the thousands, and are the txt byte lengths divided by 4.
+    </p>
     <ul>
     """
     index_html.write(head)
@@ -169,11 +172,13 @@ def build_site(ctx):
             size_bytes / 4
         )  # rough approximation by dividing by 4 characters per token
         rounded = round(approx_tokens / 1000)
+        formatted = str(rounded).rjust(4, "-")
+        formatted = formatted.replace("-", "&nbsp;")
 
         txt_name = txt_p.name
 
         # e.g. <li><a href="txts/python-3.13.5.txt" download>python-3.13.5.txt</a> ~ 2856K tokens</li>
-        tag = f'<li><a href="txts/{txt_name}" download>{txt_name}</a> ~ {rounded}K tokens</li>'
+        tag = f'<li><code>{formatted}K</code> <a href="txts/{txt_name}" download>{txt_name}</a></li>'
         index_html.write(tag)
 
     middle = """
