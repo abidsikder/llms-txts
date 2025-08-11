@@ -107,7 +107,7 @@ def cli(ctx):
     text_maker.ignore_mailto_links = True
     text_maker.ignore_emphasis = True
     text_maker.ignore_tables = True
-    text_maker.single_link_break = True
+    text_maker.single_line_break = True
     ctx.obj["text_maker"] = text_maker
 
     # Create all working directories so that other commands don't have to worry about it.
