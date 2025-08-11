@@ -1,10 +1,8 @@
 import logging
 
 import click
-import httpx
-from bs4 import BeautifulSoup
 
-from .cli import cli, collect, common_soup_clean, dl_tgz, gh_latest_tag
+from .cli import cli, collect, dl_tgz, gh_latest_tag
 from .license_info import license_info
 
 
@@ -28,22 +26,6 @@ def uv(ctx):
     txt_dest = txts / f"uv-{version}.md"
     logging.info(f"Collecting uv md docs together and writing to {txt_dest}")
     collect("**.md", extracted_dest / "docs", txt_dest, exclude="cli.md")
-
-    logging.info(f"Grabbing auto generated reference items from the docs website")
-    text_maker = ctx.obj["text_maker"]
-    for reference_url in [
-        "https://docs.astral.sh/uv/reference/cli/",
-        "https://docs.astral.sh/uv/reference/settings/",
-        "https://docs.astral.sh/uv/reference/environment/",
-    ]:
-        resp = httpx.get(reference_url)
-        soup = BeautifulSoup(resp.text, "lxml")
-        soup = soup.select("article.md-content__inner.md-typeset")[0]
-
-        common_soup_clean(soup)
-        converted = text_maker.handle(str(soup))
-        with txt_dest.open(mode="a") as f:
-            f.write(converted)
 
     logging.info(f"Done with uv {version}")
 
