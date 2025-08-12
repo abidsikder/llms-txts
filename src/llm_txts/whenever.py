@@ -2,10 +2,9 @@ import logging
 import threading
 
 import click
-import httpx
 from bs4 import BeautifulSoup
 
-from .cli import cli, gh_latest_tag
+from .cli import cli, dl_zip, gh_latest_tag
 from .license_info import license_info
 
 license_info["whenever"] = "MIT License"
@@ -24,39 +23,36 @@ def whenever(ctx):
         logging.info("Determining the latest version specifier")
         version = gh_latest_tag("ariebovenberg/whenever")
 
-    logging.info("Downloading the latest version html pages from readthedocs")
-    texts: list[str] = []
-    text_maker = ctx.obj["text_maker"]
+    converted: str = ""
 
-    def process_page(url: str):
-        html = httpx.get(url).text
-        soup = BeautifulSoup(html, "lxml")
+    def process_downloaded_html():
+        logging.info("Downloading the latest version html pages from readthedocs")
+        dl_zip(
+            "https://whenever.readthedocs.io/_/downloads/en/latest/htmlzip/",
+            scratchspace,
+        )
+        extracted = scratchspace / "whenever-latest"
+        logging.info("Converting the downloaded html to markdown")
+        soup = BeautifulSoup((extracted / "index.html").read_text(), "lxml")
         main_content = list(soup.find_all("article", id="furo-main-content"))[0]
-        text = text_maker.handle(str(main_content))
-        texts.append(text)
+        for elem in main_content.find_all("section", id="changelog"):
+            elem.decompose()
+        text_maker = ctx.obj["text_maker"]
+        nonlocal converted
+        converted = text_maker.handle(str(main_content))
 
-    docs_urls = [
-        "https://whenever.readthedocs.io/en/latest/index.html",
-        "https://whenever.readthedocs.io/en/latest/examples.html",
-        "https://whenever.readthedocs.io/en/latest/overview.html",
-        "https://whenever.readthedocs.io/en/latest/deltas.html",
-        "https://whenever.readthedocs.io/en/latest/faq.html",
-        "https://whenever.readthedocs.io/en/latest/api.html#",
-    ]
+    version_thread = threading.Thread(target=get_version)
+    html_thread = threading.Thread(target=process_downloaded_html)
 
-    threads = [threading.Thread(target=process_page, args=(url,)) for url in docs_urls]
-    threads.append(threading.Thread(target=get_version))
+    version_thread.start()
+    html_thread.start()
 
-    for thread in threads:
-        thread.start()
-
-    for thread in threads:
-        thread.join()
+    version_thread.join()
+    html_thread.join()
 
     txt_dest = ctx.obj["txts"] / f"whenever-{version}.md"
     with txt_dest.open(mode="w") as f:
-        for text in texts:
-            f.write(text)
+        f.write(converted)
 
     logging.info(f"Done processing whenever {version}")
 
