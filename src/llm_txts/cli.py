@@ -29,8 +29,8 @@ def dl_zip(dl_url: str, dest: Path):
 def dl_tgz(url: str, dest: Path):
     """Download a .tar.gz file and write it to destination."""
     resp = httpx.get(url, follow_redirects=True)
-    file = tarfile.open(fileobj=io.BytesIO(resp.content), mode="r|gz")
-    file.extractall(path=dest)
+    with tarfile.open(fileobj=io.BytesIO(resp.content), mode="r|gz") as f:
+        f.extractall(path=dest)
 
 
 def collect(pattern: str, source: Path, dest: Path, exclude=""):
@@ -110,7 +110,8 @@ def cli(ctx):
     text_maker.single_line_break = True
     ctx.obj["text_maker"] = text_maker
 
-    # Create all working directories so that other commands don't have to worry about it.
+    # Create all working directories so that other commands don't
+    # have to worry about it.
     scratchspace = Path("scratchspace")
     site_build = Path("site-build")
     txts = site_build / "txts"
@@ -140,18 +141,19 @@ def build_site(ctx):
     Each entry is formatted as "tokens txt_name". Estimated token counts are given in the thousands, and are the txt byte lengths divided by 4.
     </p>
     <ul>
-    """
+    """  # noqa: E501
     index_html.write(head)
 
     txts = ctx.obj["txts"]
     txt_ps = list(itertools.chain(txts.rglob("*.txt"), txts.rglob("*.md")))
-    # go through things alphabetically so that the website has a list in an alphabetical format
+    # go through things alphabetically so that the website has a list in an
+    # alphabetical format
     txt_ps = sorted(txt_ps)
 
     def is_misc_boto3(s):
         if not txt_name.startswith("boto3"):
             return False
-        if txt_name.endswith("general.txt") or txt_name.endswith("s3.txt"):
+        if txt_name.endswith("general.txt") or txt_name.endswith("s3.txt"):  # noqa SIM103
             return False
         return True
 
@@ -177,8 +179,8 @@ def build_site(ctx):
 
         txt_name = txt_p.name
 
-        # e.g. <li><a href="txts/python-3.13.5.txt" download>python-3.13.5.txt</a> ~ 2856K tokens</li>
-        tag = f'<li><code>{formatted}K</code> <a href="txts/{txt_name}" download>{txt_name}</a></li>'
+        # e.g. <li><a href="txts/python-3.13.5.txt" download>python-3.13.5.txt</a> ~ 2856K tokens</li> # noqa E501
+        tag = f'<li><code>{formatted}K</code> <a href="txts/{txt_name}" download>{txt_name}</a></li>'  # noqa E501
         index_html.write(tag)
 
     middle = """

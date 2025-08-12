@@ -13,7 +13,7 @@ license_info["typst"] = "Apache 2.0 License"
 @click.pass_context
 def typst(ctx):
     logging.info(
-        "Downloading typst 0.13.1 docs.md from github.com/abidsikder/typst-docs/single-file"
+        "Downloading typst 0.13.1 docs.md from github.com/abidsikder/typst-docs/single-file"  # noqa E501
     )
     download_url = "https://raw.githubusercontent.com/abidsikder/typst-docs-single-file/refs/heads/main/docs.md"
     resp = httpx.get(download_url, follow_redirects=True)

@@ -21,7 +21,8 @@ def icechunk(ctx, version: str | None):
         logging.info("Finding latest version of icechunk since none was specified")
         version = gh_latest_tag("earth-mover/icechunk")
 
-    # Get most of the docs from the handwritten markdown tutorials in the code repository
+    # Get most of the docs from the handwritten markdown tutorials in
+    # the code repository
     logging.info(f"Downloading icechunk {version} source code")
     download_url = (
         f"https://github.com/earth-mover/icechunk/archive/refs/tags/v{version}.tar.gz"
@@ -36,7 +37,9 @@ def icechunk(ctx, version: str | None):
     resp = httpx.get(f"https://icechunk.io/en/v{version}/reference/")
     soup = BeautifulSoup(resp.text, "lxml")
     content_div = soup.find("div", class_="md-content")
-    # these are pieces of the source code along with line numbers below each line of the api documentation, they are unnecessary and clutter up the context with a bunch of line numbers
+    # these are pieces of the source code along with line numbers below each line
+    # of the api documentation, they are unnecessary and clutter up the context
+    # with a bunch of line numbers
     for elem in content_div.find_all("details", class_="quote"):
         elem.decompose()
     common_soup_clean(content_div)

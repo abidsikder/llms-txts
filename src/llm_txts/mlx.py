@@ -21,7 +21,8 @@ def mlx(ctx):
     logging.info("Getting mlx version")
     version = gh_latest_tag("ml-explore/mlx")
 
-    # This is done since correlating between the gh-pages and the github tag commits is very difficult
+    # This is done since correlating between the gh-pages and
+    # the github tag commits is very difficult
     logging.info("Downloading the latest version's gh-pages build")
     dl_tgz(
         "https://github.com/ml-explore/mlx/archive/refs/heads/gh-pages.tar.gz",

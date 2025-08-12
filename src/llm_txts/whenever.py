@@ -24,7 +24,6 @@ def whenever(ctx):
         logging.info("Determining the latest version specifier")
         version = gh_latest_tag("ariebovenberg/whenever")
 
-    # This is done since correlating between the gh-pages and the github tag commits is very difficult
     logging.info("Downloading the latest version html pages from readthedocs")
     texts: list[str] = []
     text_maker = ctx.obj["text_maker"]
