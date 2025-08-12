@@ -32,10 +32,11 @@ def devdocs(tool_name: str):
         slug = tool_name
         if version is not None:
             slug = slug + "~" + version
-        # If it's numpy and a version was not specified, we need to find it, we can't just say numpy for the slug
+        # If it's numpy and a version was not specified, we need to find it,
+        # we can't say just numpy for the slug unlike others
         elif tool_name == "numpy":
             logging.info(
-                f"Need to find latest version for {tool_name}, finding list of all available versions"
+                f"Need to find latest version for {tool_name}, finding list of all available versions"  # noqa E501
             )
             list_of_all_docs = json.load(httpx.get("https://devdocs.io/docs/docs.json"))
             versions = []
@@ -61,7 +62,7 @@ def devdocs(tool_name: str):
 
         logging.info(f"Downloaded {tool_name} {version} docs into {download_dir}")
 
-        logging.info(f"Cleaning up html and parsing it into a collated txt")
+        logging.info("Cleaning up html and parsing it into a collated txt")
         txt_dest = ctx.obj["txts"] / f"{tool_name}-{version}.md"
         with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
             collected_html_p = Path(fp.name)
@@ -98,7 +99,8 @@ def devdocs(tool_name: str):
                     for p in download_dir.glob("*.html"):
                         if not p.is_file():
                             continue
-                        # Don't collect the WebXR api or its other features, it is not well supported
+                        # Don't collect the WebXR api or its other features, it is
+                        # not well supported
                         if p.name.startswith("webxr") or p.name.startswith("xr"):
                             continue
 
@@ -114,7 +116,8 @@ def devdocs(tool_name: str):
             # Clean up the context by removing unnecessary information
             for elem in soup.find_all("div", class_="_attribution"):
                 elem.decompose()
-            # Clean up browser compatibility information from dom/html/css to reduce total size
+            # Clean up browser compatibility information from dom/html/css to
+            # reduce total size
             match tool_name:
                 case "dom" | "html" | "css" | "javascript":
                     for elem in soup.find_all("details", class_="baseline-indicator"):

@@ -21,14 +21,15 @@ def mlx(ctx):
     logging.info("Getting mlx version")
     version = gh_latest_tag("ml-explore/mlx")
 
-    # This is done since correlating between the gh-pages and the github tag commits is very difficult
-    logging.info(f"Downloading the latest version's gh-pages build")
+    # This is done since correlating between the gh-pages and
+    # the github tag commits is very difficult
+    logging.info("Downloading the latest version's gh-pages build")
     dl_tgz(
-        f"https://github.com/ml-explore/mlx/archive/refs/heads/gh-pages.tar.gz",
+        "https://github.com/ml-explore/mlx/archive/refs/heads/gh-pages.tar.gz",
         scratchspace,
     )
     with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
-        logging.info(f"Processing built html into the final markdown")
+        logging.info("Processing built html into the final markdown")
         collected_html_p = Path(fp.name)
         collect(
             "dev/**.html,examples/**.html,python/**.html",

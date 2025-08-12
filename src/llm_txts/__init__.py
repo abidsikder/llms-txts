@@ -13,6 +13,7 @@ from . import (
     typst,
     uv,
     xarray,
+    whenever,
     zarr,
     zed,
 )
