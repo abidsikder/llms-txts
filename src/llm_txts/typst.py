@@ -22,7 +22,7 @@ def typst(ctx):
     with txt_dest.open("w") as f:
         f.write(resp.text)
 
-    logging.info(f"Done with typst")
+    logging.info("Done with typst")
 
 
 cli.add_command(typst)

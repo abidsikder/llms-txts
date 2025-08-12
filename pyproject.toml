@@ -26,6 +26,12 @@ dev = [
 ]
 
 [tool.ruff.lint]
-select = ["I", "F401"]
-# I enables import sorting
-# F401 detects unused variables
+select = [
+    # pycodestyle (E) and Pyflakes (F) wide variety of common issues like syntax errors and undefined names
+    "E",
+    "F",
+    "UP", # pyupgrade modernize by suggesting updates to newer syntax and features
+    "B",  # flake8-bugbear checks for likely bugs and design problems
+    "SIM",# flake8-simplify simplify complex code structures
+    "I",  # isort import sorting
+]

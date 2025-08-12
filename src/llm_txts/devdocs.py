@@ -61,7 +61,7 @@ def devdocs(tool_name: str):
 
         logging.info(f"Downloaded {tool_name} {version} docs into {download_dir}")
 
-        logging.info(f"Cleaning up html and parsing it into a collated txt")
+        logging.info("Cleaning up html and parsing it into a collated txt")
         txt_dest = ctx.obj["txts"] / f"{tool_name}-{version}.md"
         with tempfile.NamedTemporaryFile(mode="w+", delete=True, suffix=".html") as fp:
             collected_html_p = Path(fp.name)
