@@ -9,6 +9,7 @@ from . import (
     progit,
     python,
     ruff,
+    hy,
     ty,
     typst,
     uv,
