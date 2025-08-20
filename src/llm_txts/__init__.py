@@ -11,6 +11,7 @@ from . import (
     ruff,
     hy,
     ty,
+    networkx,
     typst,
     uv,
     xarray,
