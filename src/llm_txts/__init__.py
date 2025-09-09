@@ -3,6 +3,7 @@
 from . import (
     boto3,
     beautifulsoup,
+    commanderjs,
     devdocs,
     icechunk,
     mlx,
