@@ -7,6 +7,7 @@ from . import (
     devdocs,
     icechunk,
     mlx,
+    nodejs,
     progit,
     python,
     ruff,
