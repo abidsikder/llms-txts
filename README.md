@@ -1,7 +1,7 @@
 Live website for easy access: [llm-txts.pages.dev](https://llm-txts.pages.dev/)
 ===
 
-# llm-txts
+# llms-txts
 These are llms.txt for projects that don't have them. I found myself creating these things multiple times over on an ad-hoc basis—now I'm creating tools to automate the process and hopefully work with the open source community to fan out for other documentation sets.
 
 # Environment requirements
