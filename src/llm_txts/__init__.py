@@ -12,6 +12,7 @@ from . import (
     python,
     ruff,
     hy,
+    puppeteer,
     ty,
     networkx,
     typst,
