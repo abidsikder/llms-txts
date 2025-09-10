@@ -10,6 +10,7 @@ from . import (
     mlx,
     networkx,
     nodejs,
+    p5js,
     progit,
     puppeteer,
     python,
