@@ -1,23 +1,24 @@
 # ruff: noqa F401
 # If the subcommand's module is not imported it will not attach itself to the cli click.group
 from . import (
-    boto3,
     beautifulsoup,
+    boto3,
     commanderjs,
     devdocs,
+    hy,
     icechunk,
     mlx,
+    networkx,
     nodejs,
     progit,
+    puppeteer,
     python,
     ruff,
-    hy,
     ty,
-    networkx,
     typst,
     uv,
-    xarray,
     whenever,
+    xarray,
     zarr,
     zed,
 )
