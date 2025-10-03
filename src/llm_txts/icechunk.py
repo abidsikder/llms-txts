@@ -1,7 +1,7 @@
 import logging
+import subprocess
 
 import click
-import httpx
 from bs4 import BeautifulSoup
 
 from .cli import cli, collect, common_soup_clean, dl_tgz, gh_latest_tag
@@ -34,8 +34,12 @@ def icechunk(ctx, version: str | None):
     collect("**.md", extracted / "docs" / "docs", txt_dest)
 
     logging.info("Collecting the auto generated api docs from the website")
-    resp = httpx.get(f"https://icechunk.io/en/v{version}/reference/")
-    soup = BeautifulSoup(resp.text, "lxml")
+    curl_resp = subprocess.run(
+        ["curl", "-L", f"https://icechunk.io/en/v{version}/reference/"],
+        check=True,
+        capture_output=True,
+    )
+    soup = BeautifulSoup(curl_resp.stdout.decode(), "lxml")
     content_div = soup.find("div", class_="md-content")
     # these are pieces of the source code along with line numbers below each line
     # of the api documentation, they are unnecessary and clutter up the context
