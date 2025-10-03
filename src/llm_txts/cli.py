@@ -18,6 +18,14 @@ import httpx
 from .license_info import license_info
 
 
+def dl_zip_curl(dl_url: str, dest: Path):
+    """dest should be the zip path, e.g. scratchspace/foo-latest.zip"""
+    # -L follows redirects
+    subprocess.run(["curl", "-L", "-o", str(dest), dl_url], check=True)
+    with zipfile.ZipFile(dest, "r") as zip_ref:
+        zip_ref.extractall(dest.parent)
+
+
 def dl_zip(dl_url: str, dest: Path):
     """Download a zip file from a url and extract to a directory."""
     zip_resp = httpx.get(dl_url, follow_redirects=True)
