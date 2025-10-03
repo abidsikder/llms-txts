@@ -12,7 +12,7 @@ def ty(ctx):
     scratchspace = ctx.obj["scratchspace"] / "ty"
     scratchspace.mkdir(exist_ok=True)
 
-    version = "0.0.1-alpha.17"
+    version = "0.0.1-alpha.21"
     logging.info(
         'Using hardcoded version {version} since ty has no "latest" releases out'
     )

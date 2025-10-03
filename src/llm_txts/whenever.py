@@ -4,7 +4,7 @@ import threading
 import click
 from bs4 import BeautifulSoup
 
-from .cli import cli, dl_zip, gh_latest_tag
+from .cli import cli, dl_zip_curl, gh_latest_tag
 from .license_info import license_info
 
 license_info["whenever"] = "MIT License"
@@ -27,9 +27,10 @@ def whenever(ctx):
 
     def process_downloaded_html():
         logging.info("Downloading the latest version html pages from readthedocs")
-        dl_zip(
+        # Use curl because httpx seems to be blocked by readthedocs
+        dl_zip_curl(
             "https://whenever.readthedocs.io/_/downloads/en/latest/htmlzip/",
-            scratchspace,
+            scratchspace / "whenever-latest.zip",
         )
         extracted = scratchspace / "whenever-latest"
         logging.info("Converting the downloaded html to markdown")

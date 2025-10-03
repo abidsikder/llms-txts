@@ -18,6 +18,14 @@ import httpx
 from .license_info import license_info
 
 
+def dl_zip_curl(dl_url: str, dest: Path):
+    """dest should be the zip path, e.g. scratchspace/foo-latest.zip"""
+    # -L follows redirects
+    subprocess.run(["curl", "-L", "-o", str(dest), dl_url], check=True)
+    with zipfile.ZipFile(dest, "r") as zip_ref:
+        zip_ref.extractall(dest.parent)
+
+
 def dl_zip(dl_url: str, dest: Path):
     """Download a zip file from a url and extract to a directory."""
     zip_resp = httpx.get(dl_url, follow_redirects=True)
@@ -133,13 +141,13 @@ def build_site(ctx):
     head = """<!doctype html><html>
     <head><title>llm-txts</title></head>
     <body>
-    <h1>llm-txts for use with your favorite long context LLM or RAG system</h1>
-    <p>Most token sizes here aim for &lt;800K tokens, but it remains a challenge with some particularly large documentation sets. Work is ongoing to pare them down for LLM digestability.</p>
-
+    <h1>Missing llms.txts</h1>
     <a href="https://github.com/abidsikder/llm-txts" target="_blank">GitHub</a>
     <p>
-    Each entry is formatted as "tokens txt_name". Estimated token counts are given in the thousands, and are the txt byte lengths divided by 4.
+    Each entry is "token_size txt_name". Token counts are estimated by dividing byte lengths by 4.
     </p>
+    <p>We aim for &lt;800K tokens, but some docs are very large. Shortening them for LLM digestion is ongoing.</p>
+    <p>Scroll to find licensing acknowledgments on this page.</p>
     <ul>
     """  # noqa: E501
     index_html.write(head)
