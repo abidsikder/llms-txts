@@ -38,7 +38,9 @@ def devdocs(tool_name: str):
             logging.info(
                 f"Need to find latest version for {tool_name}, finding list of all available versions"  # noqa E501
             )
-            list_of_all_docs = json.load(httpx.get("https://devdocs.io/docs/docs.json"))
+            list_of_all_docs = json.loads(
+                httpx.get("https://devdocs.io/docs/docs.json").text
+            )
             versions = []
             for d in list_of_all_docs:
                 if tool_name in d["slug"]:
