@@ -1,7 +1,7 @@
 import logging
+import subprocess
 
 import click
-import httpx
 from bs4 import BeautifulSoup
 
 from .cli import cli, collect, common_soup_clean, dl_tgz, gh_latest_tag
@@ -39,10 +39,12 @@ def xarray(ctx, version: str | None):
     logging.info(
         "Grabbing xarray's detailed api documentation and adding it to the txt"
     )
-    resp = httpx.get(f"https://docs.xarray.dev/en/v{version}/api.html")
-
-    soup = BeautifulSoup(resp.text, "lxml")
-    # filter out unneeded content
+    curl_resp = subprocess.run(
+        ["curl", "-L", f"https://docs.xarray.dev/en/v{version}/api.html"],
+        check=True,
+        capture_output=True,
+    )
+    soup = BeautifulSoup(curl_resp.stdout.decode(), "lxml")
     soup = BeautifulSoup(
         str(list(soup.find_all("article", class_="bd-article"))[0]), "lxml"
     )
