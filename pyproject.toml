@@ -21,8 +21,8 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "ruff>=0.12.7",
-    "ty>=0.0.1a19",
+    "ruff>=0.13.3",
+    "ty>=0.0.1a21",
 ]
 
 [tool.ruff.lint]
