@@ -41,10 +41,11 @@ uv run lt uv &
 uv run lt vite &
 uv run lt vitest &
 uv run lt whenever &
-# api.html does not have a comprehensive list for versions after this one
 uv run lt xarray --version "2025.07.1" &
 uv run lt zarr &
 uv run lt zed &
+uv run lt zig language 0.15.2 &
+uv run lt zig language master &
 uv run lt zsh &
 
 echo "Finished building all documentation sets" >&2

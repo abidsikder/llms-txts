@@ -21,6 +21,7 @@ from . import (
     whenever,
     xarray,
     zarr,
+    zig,
     zed,
 )
 from .cli import cli
