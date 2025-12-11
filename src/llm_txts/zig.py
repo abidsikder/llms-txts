@@ -1,4 +1,5 @@
 import logging
+import re
 
 import click
 import httpx
@@ -43,6 +44,10 @@ def zig_lang_ref(ctx, version: str):
 
     text_maker = ctx.obj["text_maker"]
     converted = text_maker.handle(cleaned_html)
+    if version == "master":
+        pattern = r'zig_version_string = "([^"]*)"'
+        match = re.search(pattern, converted)
+        version = match.group(1)
 
     txts = ctx.obj["txts"]
     txt_dest = txts / f"zig-language-ref-{version}.md"
